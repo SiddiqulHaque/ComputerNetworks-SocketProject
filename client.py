@@ -1,11 +1,11 @@
 import socket
 import os
 import random
-host = socket.gethostbyname('LAPTOP-NCLJ4M38') #siddiqul
+# host = socket.gethostbyname('LAPTOP-NCLJ4M38') #siddiqul
 # host = socket.gethostbyname('LAPTOP-LLHFBHBJ') #musharraf
 # host = socket.gethostbyname('LAPTOP-EHJ8VBPC') #musharraf
 
-# host = '127.0.0.1'
+host = '127.0.0.1'
 port = 23000
 ADDR = (host, port)
 SIZE = 1024
@@ -16,7 +16,10 @@ client.connect(ADDR)
 
 print("Client is conected")
 
+def replaceWords(conn):
+    print("replace Words")
 # files = os.listdir('./files')
+
 def diffie_hellman_client(conn):
     p=23
     g=5
@@ -56,6 +59,8 @@ def sendFiles():
         if(msg == "__TEXT__"):
             with open(f"{pth}/{file}") as f:
                 msg = f.read()
+                if not msg:
+                    msg = " "
                 client.send(msg.encode())
     
     msg = "__SENT__" 
