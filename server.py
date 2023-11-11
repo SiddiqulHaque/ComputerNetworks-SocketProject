@@ -13,24 +13,45 @@ DISCONNNECT_PROTOCOL = "disconnect"
 
 userList = {}
 msgList = {}
-badWord={"Kill","Why","How"}
+badWord={"Hiya", "Sup", "Hey", "Yo", "Howdy",
+    "Cool", "Sweet", "Awesome", "Rad",
+    "Seriously?", "No way!", "OMG", "Wow",
+    "Wanna", "Gonna", "Kinda", "Dunno",
+    "Lit", "Sick", "Legit", "Fire",
+    "Thanks a bunch", "Appreciate it", "Thanks a ton", "Cheers","bitch","Kill","Damn","Shit"}
 connName = ""
 
+def removebadword(msg):
+    msg=msg.lower()
+    for item in badWord:
+        item=item.lower()
+        msg = msg.replace(item, "")
+    return msg
+
 def replaceWords(conn, addr):
-    clientMsg = conn.recv().decode()
-    msg = ""
+
+    msg = "[SERVER]: Ready to replace"
+    conn.send(msg.encode())
+    replacing = True
+    while replacing:
+        clientMsg = conn.recv(SIZE).decode()
+        msg = "Enter Word to Replace"
+        conn.send(msg.encode())
+        word = conn.recv(SIZE).decode()
+        if (word == "_exit"):
+            replacing = False
+            break
+        msg = "Enter Word to Replace with"
+        conn.send(msg.encode())
+        replace = conn.recv(SIZE).decode()
+        clientMsg = clientMsg.replace(word,replace)
+        conn.send(clientMsg.encode())
+
 
 
 def writeClientFile(addr, msg):
     with open(f"./users/{userList[addr][0]}.txt", "a") as f:
         f.write(f"{msg}\n")
-
-def removebadword(msg):
-    str.casefold(msg)
-    for item in badWord:
-        str.casefold(item)
-        msg=msg.replace(item,"")
-    return msg
 
 def diffie_hellman_server(conn):
     p=23
@@ -101,7 +122,7 @@ def countFiles(conn, addr):
                 else:
                     charFlag = 0
                     for char in file:
-                        if (char == " " or char == "\n") and charFlag:
+                        if (char == " ") and charFlag:
                             charFlag = 0
                             wordcount += 1
                         else:
@@ -156,6 +177,7 @@ def handleClient(conn, addr):
     clientConnection = True
     while clientConnection:
         msg = conn.recv(SIZE).decode()
+        msg=removebadword(msg)
         if(msg == DISCONNNECT_PROTOCOL):
             clientConnection = False
             msg = f"DISCONNECTED TO {client.get('name')}\n"
@@ -165,6 +187,7 @@ def handleClient(conn, addr):
             getMsg()
 
         else:
+            writeClientFile(addr,msg)
             msg = f"[{sender['name']}]: {msg}\n"
             data = msgList.get(clientName) + msg
             msgList[clientName] = data
@@ -238,8 +261,11 @@ def handleConnections(conn, addr):
             # conn.send(data.encode())
             getMsg(conn, addr)
             # continue
+        elif (msg == "replaceWords()"):
+            replaceWords(conn, addr)
         else:
             msg=removebadword(msg)
+            
             data = f"[SERVER] : {msg} RECEIVED\n"
             writeClientFile(addr, msg)
             conn.send(data.encode())
@@ -263,3 +289,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+

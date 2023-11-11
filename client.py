@@ -17,9 +17,27 @@ client.connect(ADDR)
 print("Client is conected")
 
 def replaceWords(conn):
-    print("replace Words")
-# files = os.listdir('./files')
+    replacing = True
+    msg = conn.recv(SIZE).decode()
+    print(msg)
+    myMsg = input("Enter Your Msg: ")
+    while replacing:
+        conn.send(myMsg.encode())
+        msg = conn.recv(SIZE).decode()
+        data = input(f"{msg}: ")
+        conn.send(data.encode())
+        if(data == "_exit"):
+            replacing = False
+            break
 
+        msg = conn.recv(SIZE).decode()
+        data = input(f"{msg}: ")
+        conn.send(data.encode())
+        myMsg = conn.recv(SIZE).decode()
+        print("[SERVER]: ",myMsg)
+
+
+# files = os.listdir('./files')
 def diffie_hellman_client(conn):
     p=23
     g=5
@@ -132,11 +150,12 @@ def main():
             msg = client.recv(SIZE).decode()
             print(msg)
 
+        elif (data == "replaceWords()") :
+            replaceWords(client)
         else:
             # print("Waiting for server...")
             msg = client.recv(SIZE).decode()
             print(msg)
-    
 
 if __name__ == "__main__" :
     main()
